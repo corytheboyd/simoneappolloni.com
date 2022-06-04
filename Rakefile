@@ -16,7 +16,7 @@ namespace :db do
     Sequel.extension :migration
     version = args[:version].to_i if args[:version]
     Sequel.sqlite(ENV.fetch("DATABASE_PATH"), logger: Logger.new($stderr)) do |db|
-      Sequel::Migrator.run(db, "db/migrations", target: version)
+      Sequel::Migrator.run(db, "db/migrations", target: version, use_transactions: true)
     end
   end
 end

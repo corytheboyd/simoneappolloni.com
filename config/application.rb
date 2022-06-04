@@ -1,5 +1,5 @@
 require 'rubygems'
-require 'bundler/settings'
+require 'bundler/setup'
 require 'logger'
 
 require 'dotenv'
