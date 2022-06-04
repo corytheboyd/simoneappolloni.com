@@ -8,3 +8,7 @@ gem "sequel"
 gem "sqlite3"
 gem "dotenv"
 gem "rake"
+
+group :development do
+  gem 'pry'
+end

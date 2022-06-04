@@ -1,13 +1,14 @@
-require 'rubygems'
-require 'bundler/settings'
-require 'logger'
-
-require 'dotenv'
-Dotenv.load
+task :console do
+  desc "Interactive console"
+  require_relative 'config/application'
+  require 'pry'
+  Pry.start
+end
 
 namespace :db do
   desc "Run migrations"
-  task :migrate, [:version] do |t, args|
+  task :migrate, [:version] do |_t, args|
+    require_relative 'config/application'
     require "sequel/core"
     Sequel.extension :migration
     version = args[:version].to_i if args[:version]

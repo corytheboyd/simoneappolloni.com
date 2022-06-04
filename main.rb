@@ -7,15 +7,19 @@ require 'nokogiri'
 require 'faraday'
 require 'sequel'
 
+# require_relative 'app/models/artist'
+
 DATABASE_PATH = 'database.sqlite'
 PATH_PATTERN = 'https://www.allmusic.com/profile/gybo_96/reviews/all/recent/%d'
 
 DB = Sequel.sqlite(DATABASE_PATH)
 
-DB.create_table :reviews do
-  primary_key :id
-  String :artist, null: false
-end
+
+
+
+puts Artist.create(name: 'Radiohead')
+
+exit 0
 
 response = Faraday.get(PATH_PATTERN % 1)
 document = Nokogiri::HTML(response.body)
