@@ -23,10 +23,12 @@ end
 
 task :sync do
   desc "Sync data from remote to local database"
+  username = ENV.fetch('username')
+  start_page_number = Integer(ENV.fetch('start_page_number'))
   require_relative 'config/application'
   require_relative 'app/models/user'
   require_relative 'app/runner'
-  user = User.find_or_create(username: 'gybo_96')
-  runner = Runner.new(user)
+  user = User.find_or_create(username: username)
+  runner = Runner.new(user, start_page_number)
   runner.run
 end

@@ -9,21 +9,21 @@ require 'faraday'
 
 Thread.ignore_deadlock = true
 
-PATH_PATTERN = 'https://www.allmusic.com/profile/gybo_96/reviews/all/recent/%d'
-
 class Runner
-  def initialize(user)
+  def initialize(user, start_page_number = 1)
     @logger = Logger.new($stdout)
-    @logger.level = :debug
+    @logger.level = ENV.fetch('log_level', 'debug')
     @fetch_queue = Thread::Queue.new
     @work_queue = Thread::Queue.new
     @user = user
+    @start_page_number = start_page_number
+    @path_pattern = "https://www.allmusic.com/profile/#{user.username}/reviews/all/recent/%d"
   end
 
   def run
     fetch_thread = create_fetch_thread
     work_thread = create_work_thread
-    fetch_queue.push(1..7)
+    fetch_queue.push((start_page_number)..(start_page_number + 7))
     fetch_thread.join
     work_queue.close
     work_thread.join
@@ -31,7 +31,7 @@ class Runner
 
   private
 
-  attr_reader :logger, :fetch_queue, :work_queue, :user
+  attr_reader :logger, :fetch_queue, :work_queue, :user, :start_page_number, :path_pattern
 
   def create_fetch_thread
     Thread.new do
@@ -46,15 +46,15 @@ class Runner
         logger.debug('fetch_thread') { "received page range to process: #{page_range}" }
 
         threads = []
-        last_page_number = page_range.max
+        last_page_number = page_range.min
         (page_range).each do |page_number|
           threads << Thread.new do
-            url = PATH_PATTERN % page_number
+            url = path_pattern % page_number
             logger.debug('fetch_thread') { "fetch document at: #{url}" }
 
-            response = Faraday.get(PATH_PATTERN % page_number)
+            response = Faraday.get(path_pattern % page_number)
             unless response.status == 200
-              logger.debug('fetch_thread') { "fetch response has not ok status: #{response.status}" }
+              logger.warn('fetch_thread') { "fetch response has not ok status: #{response.status} url=`#{url}`" }
               Thread.current.kill
             end
 
@@ -80,6 +80,7 @@ class Runner
                 logger.debug('fetch_thread') { "enqueue next range of pages: `#{next_page_range}`" }
                 fetch_queue.push(next_page_range)
               else
+                logger.debug('fetch_thread') { "no more pages" }
                 fetch_queue.close
               end
             end
@@ -112,10 +113,10 @@ class Runner
           review_rating = review_rating_el.attribute('class').value.split(' ').find.grep(/rating-average-\d+/).first.split('-').last.to_i
 
           thumbs_up = node.css('.thumbs-up-count').first.text.gsub(/\W+/, '').to_i rescue -1
-          thumbs_down = node.css('.thumbs-up-count').first.text.gsub(/\W+/, '').to_i rescue -1
+          thumbs_down = node.css('.thumbs-down-count').first.text.gsub(/\W+/, '').to_i rescue -1
 
           review_attributes = {}.tap do |a|
-            a[:page_url] = PATH_PATTERN % page_number
+            a[:page_url] = path_pattern % page_number
             a[:thumbs_up] = thumbs_up if thumbs_up > 0
             a[:thumbs_down] = thumbs_down if thumbs_down > 0
           end
@@ -133,7 +134,7 @@ class Runner
           end
 
           logger.info('work_thread') do
-            "Processed: artist=`#{[artist.id, artist.name]}` album=`#{[artist.id, album.name]}` review=`#{[review.id, "#{review.body[0..15]}..."]}`"
+            "Processed: artist=`#{[artist.id, artist.name]}` album=`#{[artist.id, album.name]}` page_number=`#{page_number}` review=`#{[review.id, "#{review.body[0..15]}..."]}`"
           end
         end
       end
