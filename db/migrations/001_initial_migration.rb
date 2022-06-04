@@ -2,7 +2,7 @@ Sequel.migration do
   up do
     create_table(:artists) do
       primary_key :id
-      String :name, null: false
+      String :name, unique: true, null: false
     end
 
     create_table(:albums) do
@@ -10,10 +10,18 @@ Sequel.migration do
       String :name, null: false
     end
 
+    alter_table(:albums) do
+      add_foreign_key :artist_id, :albums
+    end
+
     create_table(:reviews) do
       primary_key :id
       String :body, null: false
       Integer :rating, null: false
+    end
+
+    alter_table(:reviews) do
+      add_foreign_key :album_id, :reviews
     end
   end
 

@@ -1,6 +1,9 @@
 task :console do
   desc "Interactive console"
   require_relative 'config/application'
+  Dir.glob(File.expand_path('app/models/*.rb', __dir__)) do |file|
+    require(file)
+  end
   require 'pry'
   Pry.start
 end

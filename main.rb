@@ -1,24 +1,16 @@
 # frozen_string_literal: true
 
-require 'rubygems'
-require 'bundler/setup'
+require_relative 'config/application'
 
-require 'nokogiri'
-require 'faraday'
-require 'sequel'
+require_relative 'app/models/artist'
+require_relative 'app/models/album'
+require_relative 'app/models/review'
 
-# require_relative 'app/models/artist'
+# artist = Artist.create(name: 'Metallica')
+# album = artist.add_album(name: 'Ride the Lightning')
+# review = album.add_review(body: 'This slaps', rating: 9)
 
-DATABASE_PATH = 'database.sqlite'
-PATH_PATTERN = 'https://www.allmusic.com/profile/gybo_96/reviews/all/recent/%d'
-
-DB = Sequel.sqlite(DATABASE_PATH)
-
-
-
-
-puts Artist.create(name: 'Radiohead')
-
+p [artist, album]
 exit 0
 
 response = Faraday.get(PATH_PATTERN % 1)
