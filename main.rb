@@ -36,19 +36,41 @@ fetch_thread = Thread.new do
     logger.debug('fetch_thread') { "received page range to process: #{page_range}" }
 
     threads = []
+    last_page_number = page_range.max
     (page_range).each do |page_number|
       threads << Thread.new do
         url = PATH_PATTERN % page_number
         logger.debug('fetch_thread') { "fetch document at: #{url}" }
 
         response = Faraday.get(PATH_PATTERN % page_number)
-        logger.debug('fetch_thread') { "fetch response: status=`#{response.status}`" }
+        unless response.status == 200
+          logger.debug('fetch_thread') { "fetch response has not ok status: #{response.status}" }
+          Thread.current.kill
+        end
 
         document = Nokogiri::HTML(response.body)
         logger.debug('fetch_thread') { "document parsed" }
 
         work_queue.push(document)
         logger.debug('fetch_thread') { "document sent to work_queue" }
+
+        if page_number == last_page_number
+          logger.debug('fetch_thread') { "getting next page range from last page pagination buttons" }
+
+          next_last_page_number = -1
+          document.css('.pagination > a').each do |link|
+            link_page_number = link.text.to_i rescue -1
+            if link_page_number > next_last_page_number
+              next_last_page_number = link_page_number
+            end
+          end
+
+          if next_last_page_number > last_page_number
+            next_page_range = ((last_page_number + 1)..next_last_page_number)
+            logger.debug('fetch_thread') { "enqueue next range of pages: `#{next_page_range}`" }
+            fetch_queue.push(next_page_range)
+          end
+        end
       end
     end
     threads.each(&:join)
