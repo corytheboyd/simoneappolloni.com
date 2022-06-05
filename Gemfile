@@ -8,6 +8,10 @@ gem "sequel"
 gem "sqlite3"
 gem "dotenv"
 gem "rake"
+gem "sinatra"
+gem "webrick"
+gem 'rack-cors'
+gem 'sinatra-contrib'
 
 group :development do
   gem 'pry'

@@ -8,16 +8,37 @@ GEM
       ruby2_keywords (>= 0.0.4)
     faraday-net_http (2.0.3)
     method_source (1.0.0)
+    multi_json (1.15.0)
+    mustermann (1.1.1)
+      ruby2_keywords (~> 0.0.1)
     nokogiri (1.13.6-x86_64-linux)
       racc (~> 1.4)
     pry (0.14.1)
       coderay (~> 1.1)
       method_source (~> 1.0)
     racc (1.6.0)
+    rack (2.2.3.1)
+    rack-cors (1.1.1)
+      rack (>= 2.0.0)
+    rack-protection (2.2.0)
+      rack
     rake (13.0.6)
     ruby2_keywords (0.0.5)
     sequel (5.57.0)
+    sinatra (2.2.0)
+      mustermann (~> 1.0)
+      rack (~> 2.2)
+      rack-protection (= 2.2.0)
+      tilt (~> 2.0)
+    sinatra-contrib (2.2.0)
+      multi_json
+      mustermann (~> 1.0)
+      rack-protection (= 2.2.0)
+      sinatra (= 2.2.0)
+      tilt (~> 2.0)
     sqlite3 (1.4.2)
+    tilt (2.0.10)
+    webrick (1.7.0)
 
 PLATFORMS
   x86_64-linux
@@ -27,9 +48,13 @@ DEPENDENCIES
   faraday
   nokogiri
   pry
+  rack-cors
   rake
   sequel
+  sinatra
+  sinatra-contrib
   sqlite3
+  webrick
 
 BUNDLED WITH
    2.3.15

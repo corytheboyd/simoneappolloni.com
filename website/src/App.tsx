@@ -2,8 +2,8 @@ import React, {useEffect} from 'react';
 
 function App() {
     useEffect(() => {
-        fetch('/data.json')
-            .then((res) => res.json())
+        fetch('http://localhost:4567/data')
+            .then((res) => res.text())
             .then((data) => console.log(data))
     }, [])
 

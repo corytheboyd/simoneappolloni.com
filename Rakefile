@@ -1,6 +1,7 @@
 task :console do
   desc "Interactive console"
   require_relative 'config/application'
+  require_relative 'config/db'
   Dir.glob(File.expand_path('app/models/*.rb', __dir__)) do |file|
     require(file)
   end
@@ -12,6 +13,7 @@ namespace :db do
   desc "Run migrations"
   task :migrate, [:version] do |_t, args|
     require_relative 'config/application'
+    require_relative 'config/db'
     require "sequel/core"
     Sequel.extension :migration
     version = args[:version].to_i if args[:version]
@@ -27,6 +29,7 @@ task :sync do
   start_page_number = Integer(ENV.fetch('start_page_number'))
   skip_page_numbers = ENV.fetch('skip_page_numbers', '').split(',').map(&:to_i)
   require_relative 'config/application'
+  require_relative 'config/db'
   require_relative 'app/models/user'
   require_relative 'app/runner'
   user = User.find_or_create(username: username)

@@ -3,7 +3,4 @@ require 'bundler/setup'
 require 'logger'
 
 require 'dotenv'
-Dotenv.load
-
-require 'sequel'
-DB = Sequel.sqlite(ENV.fetch('DATABASE_PATH'))
+Dotenv.load(File.expand_path('../.env', __dir__))
