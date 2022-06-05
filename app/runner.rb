@@ -10,7 +10,7 @@ require 'faraday'
 Thread.ignore_deadlock = true
 
 class Runner
-  def initialize(user, start_page_number = 1)
+  def initialize(user, start_page_number = 1, skip_page_numbers = [])
     @logger = Logger.new($stdout)
     @logger.level = ENV.fetch('log_level', 'debug')
     @fetch_queue = Thread::Queue.new
@@ -18,6 +18,7 @@ class Runner
     @user = user
     @start_page_number = start_page_number
     @path_pattern = "https://www.allmusic.com/profile/#{user.username}/reviews/all/recent/%d"
+    @skip_page_numbers = skip_page_numbers
   end
 
   def run
@@ -31,7 +32,7 @@ class Runner
 
   private
 
-  attr_reader :logger, :fetch_queue, :work_queue, :user, :start_page_number, :path_pattern
+  attr_reader :logger, :fetch_queue, :work_queue, :user, :start_page_number, :path_pattern, :skip_page_numbers
 
   def create_fetch_thread
     Thread.new do
@@ -48,6 +49,11 @@ class Runner
         threads = []
         last_page_number = page_range.min
         (page_range).each do |page_number|
+          if skip_page_numbers.include?(page_number)
+            logger.debug('fetch_thread') { "skip page number: #{page_number}" }
+            next
+          end
+
           threads << Thread.new do
             url = path_pattern % page_number
             logger.debug('fetch_thread') { "fetch document at: #{url}" }
